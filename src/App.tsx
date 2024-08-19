@@ -1,5 +1,11 @@
+import { Map } from "@/features/map";
+
 function App() {
-  return <></>;
+  return (
+    <>
+      <Map />
+    </>
+  );
 }
 
 export default App;
