@@ -1,66 +1,99 @@
-import { useEffect, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
+import { Stage, Image, Layer } from "react-konva";
+
+import { roundNumber } from "@/utils";
+
+function getCenteredCoords(width: number, height: number, scale: number) {
+  return {
+    x: roundNumber((width - width * scale) / 2),
+    y: roundNumber((height - height * scale) / 2),
+  };
+}
 
 export const Map = ({
-  scale = 1,
-  width: canvasWidth = 1000,
-  height: canvasHeight = 1000,
+  width = 1000,
+  height = 1000,
   imgSrc,
+  scale,
 }: {
-  scale?: number;
-  height?: number;
   width?: number;
+  height?: number;
   imgSrc: string;
+  scale: number;
 }) => {
-  const canvRef = useRef<null | HTMLCanvasElement>(null);
-  const ctxRef = useRef<CanvasRenderingContext2D | null>(null);
+  const [image, setImage] = useState<null | HTMLImageElement>(null);
+  const prevScale = useRef(scale);
 
-  const drawImage = () => {
-    if (ctxRef.current) {
-      const img = new Image();
-      img.src = imgSrc;
-
-      img.addEventListener("load", () => {
-        const dx = (canvasWidth - canvasWidth * scale) / 2;
-        const dy = (canvasHeight - canvasWidth * scale) / 2;
-
-        ctxRef.current!.drawImage(
-          img,
-          dx,
-          dy,
-          canvasWidth * scale,
-          canvasHeight * scale,
-        );
-      });
-    }
-  };
-
-  const initCanvasCtx = () => {
-    if (canvRef.current?.getContext) {
-      const ctx = canvRef.current.getContext("2d");
-      ctxRef.current = ctx;
-    }
-  };
-
-  const clearCanvas = () => {
-    ctxRef.current?.clearRect(0, 0, canvasWidth, canvasHeight);
-  };
+  const [mapPosition, setPosition] = useState(
+    getCenteredCoords(width, height, scale),
+  );
 
   useEffect(() => {
-    initCanvasCtx();
-    drawImage();
-    return () => {
-      clearCanvas();
-    };
-  }, [scale, canvasWidth, canvasHeight]);
+    loadImage();
+  }, [imgSrc]);
+
+  useEffect(() => {
+    // preserve position during scaling
+    setPosition((state) => ({
+      x: roundNumber(state.x * (scale / prevScale.current)),
+      y: roundNumber(state.y * (scale / prevScale.current)),
+    }));
+    prevScale.current = scale;
+  }, [scale]);
+
+  const loadImage = () => {
+    const img = new window.Image();
+    img.src = imgSrc;
+    img.addEventListener("load", () => setImage(img));
+  };
 
   return (
-    <>
-      <canvas
-        style={{ border: "1px solid black" }}
-        width={canvasWidth}
-        height={canvasHeight}
-        ref={canvRef}
-      ></canvas>
-    </>
+    <Stage width={width} height={height}>
+      {image && (
+        <Layer>
+          <Image
+            image={image}
+            scale={{ x: scale, y: scale }}
+            x={mapPosition.x}
+            y={mapPosition.y}
+            width={width}
+            height={height}
+            draggable
+            onDragMove={(e) => {
+              // restrict dragging only within image
+              const newPos = { ...e.target.getPosition() };
+              const rightEdge = width - width * scale;
+              const bottomEdge = height - height * scale;
+              const topEdge = 0;
+              const leftEdge = 0;
+
+              if (e.target.x() < rightEdge) {
+                newPos.x = rightEdge;
+              }
+
+              if (e.target.y() < bottomEdge) {
+                newPos.y = bottomEdge;
+              }
+
+              if (e.target.x() > topEdge) {
+                newPos.x = topEdge;
+              }
+
+              if (e.target.y() > leftEdge) {
+                newPos.y = leftEdge;
+              }
+
+              e.target.setPosition(newPos);
+            }}
+            onDragEnd={(e) => {
+              setPosition({
+                x: roundNumber(e.target.x()),
+                y: roundNumber(e.target.y()),
+              });
+            }}
+          />
+        </Layer>
+      )}
+    </Stage>
   );
 };

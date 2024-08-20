@@ -4,14 +4,30 @@ import { Map } from "./Map";
 
 import imgSrc from "@/assets/TCI.jpg";
 
+const MAX_ZOOM = 10;
+const MIN_ZOOM = 0.5;
+
 export const MapContainer = () => {
   const [scale, setScale] = useState(1);
+
+  const zoomIn = () => {
+    setScale((s) => {
+      return Math.min(s + 1, MAX_ZOOM);
+    });
+  };
+
+  const zoomOut = () => {
+    setScale((s) => {
+      return Math.max(s - 1, MIN_ZOOM);
+    });
+  };
+
   return (
     <div>
       <div>
         Panel
-        <button onClick={() => setScale((s) => s + 1)}>+</button>
-        <button onClick={() => setScale((s) => s - 1)}>-</button>
+        <button onClick={zoomIn}>+</button>
+        <button onClick={zoomOut}>-</button>
       </div>
       <Map imgSrc={imgSrc} scale={scale} />
     </div>
