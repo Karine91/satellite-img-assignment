@@ -1,9 +1,9 @@
-import { Map } from "@/features/map";
+import { MapContainer } from "@/features/map";
 
 function App() {
   return (
     <>
-      <Map />
+      <MapContainer />
     </>
   );
 }
