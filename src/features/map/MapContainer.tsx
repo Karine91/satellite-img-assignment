@@ -26,8 +26,12 @@ export const MapContainer = () => {
     <div>
       <div>
         Panel
-        <button onClick={zoomIn}>+</button>
-        <button onClick={zoomOut}>-</button>
+        <button disabled={scale === MAX_ZOOM} onClick={zoomIn}>
+          +
+        </button>
+        <button disabled={scale === MIN_ZOOM} onClick={zoomOut}>
+          -
+        </button>
       </div>
       <Map imgSrc={imgSrc} scale={scale} />
     </div>
