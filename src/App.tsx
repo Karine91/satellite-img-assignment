@@ -1,9 +1,9 @@
-import { MapContainer } from "@/features/map";
+import { MapScreen } from "@/screens/MapScreen";
 
 function App() {
   return (
     <>
-      <MapContainer />
+      <MapScreen />
     </>
   );
 }

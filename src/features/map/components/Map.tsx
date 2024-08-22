@@ -1,13 +1,19 @@
 import { KonvaEventObject } from "konva/lib/Node";
+import { Image as KonvaImage } from "konva/lib/shapes/Image";
+import { Stage as KonvaStage } from "konva/lib/Stage";
 import { useState, useEffect, useRef } from "react";
 import { Stage, Image, Layer } from "react-konva";
 
+import { useCreateShape } from "../hooks/useCreateShape";
 import {
   getCenteredCoords,
   getMapPosition,
   getScaledPosition,
-} from "./services/mapService";
+} from "../services/mapService";
 
+import { Rectangle } from "./Rectangle";
+
+import { useCreatingStore } from "@/store/creatingStore";
 import { loadImage } from "@/utils";
 
 export const Map = ({
@@ -23,6 +29,11 @@ export const Map = ({
 }) => {
   const [image, setImage] = useState<null | HTMLImageElement>(null);
   const prevScale = useRef(scale);
+  const stageRef = useRef<null | KonvaStage>(null);
+  const mapImgRef = useRef<null | KonvaImage>(null);
+
+  const shapeType = useCreatingStore((state) => state.shapeType);
+  const { points, stageHandlers } = useCreateShape();
 
   const [mapPosition, setPosition] = useState(
     getCenteredCoords({ width, height, scale }),
@@ -67,10 +78,11 @@ export const Map = ({
   };
 
   return (
-    <Stage width={width} height={height}>
+    <Stage ref={stageRef} width={width} height={height} {...stageHandlers}>
       {image && (
         <Layer>
           <Image
+            ref={mapImgRef}
             image={image}
             scale={{ x: scale, y: scale }}
             x={mapPosition.x}
@@ -88,6 +100,7 @@ export const Map = ({
           />
         </Layer>
       )}
+      {shapeType === "rect" && <Rectangle points={points} />}
     </Stage>
   );
 };
