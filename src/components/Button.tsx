@@ -6,7 +6,7 @@ const Button = ({
 }: React.ComponentPropsWithoutRef<"button">) => {
   return (
     <button
-      className="p-2 bg-blue-900 text-white min-w-12 rounded-md"
+      className="p-2 bg-blue-900 text-white min-w-12 rounded-md disabled:bg-gray-500"
       {...props}
     >
       {children}

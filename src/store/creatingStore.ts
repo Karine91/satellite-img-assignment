@@ -6,15 +6,15 @@ import { ShapeType } from "@/types";
 type CreateState = {
   createMode: boolean;
   shapeType: ShapeType;
-  setCreating: (val: boolean) => void;
+  setCreateMode: (val: boolean) => void;
   setShapeType: (type: ShapeType) => void;
 };
 
 export const useCreatingStore = create<CreateState>()(
   devtools((set) => ({
-    createMode: true,
+    createMode: false,
     shapeType: "rect",
-    setCreating: (val) => {
+    setCreateMode: (val) => {
       set({ createMode: val });
     },
     setShapeType: (type) => set({ shapeType: type }),

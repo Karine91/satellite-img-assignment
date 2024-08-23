@@ -30,15 +30,23 @@ export function getScaledPosition({
   currPos,
   scale,
   prevScale,
+  canvas,
 }: {
   currPos: Position;
   scale: number;
   prevScale: number;
+  canvas: Dimensions;
 }) {
-  return {
+  const newPos = {
     x: currPos.x * (scale / prevScale),
     y: currPos.y * (scale / prevScale),
   };
+  return getMapPosition({
+    canvas,
+    currentPos: newPos,
+    prevPos: { x: 0, y: 0 },
+    scale,
+  });
 }
 
 export function getMapPosition({

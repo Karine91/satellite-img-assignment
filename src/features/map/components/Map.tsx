@@ -1,65 +1,44 @@
 import { KonvaEventObject } from "konva/lib/Node";
-import { Image as KonvaImage } from "konva/lib/shapes/Image";
-import { Stage as KonvaStage } from "konva/lib/Stage";
-import { useState, useEffect, useRef } from "react";
-import { Stage, Image, Layer } from "react-konva";
+import { useState, useRef, useEffect } from "react";
+import { Group, Stage, Layer } from "react-konva";
 
-import { useCreateShape } from "../hooks/useCreateShape";
 import {
   getCenteredCoords,
   getMapPosition,
   getScaledPosition,
 } from "../services/mapService";
 
-import { Rectangle } from "./Rectangle";
+import { MapImage, type IMapImageProps } from "./MapImage";
+import { Shapes } from "./Shapes";
 
-import { useCreatingStore } from "@/store/creatingStore";
-import { loadImage } from "@/utils";
+import { useMapStore } from "@/store/mapStore";
 
 export const Map = ({
   width = 1000,
   height = 1000,
   imgSrc,
-  scale,
-}: {
-  width?: number;
-  height?: number;
-  imgSrc: string;
-  scale: number;
-}) => {
-  const [image, setImage] = useState<null | HTMLImageElement>(null);
+}: Pick<IMapImageProps, "imgSrc"> &
+  Partial<Pick<IMapImageProps, "height" | "width">>) => {
+  const scale = useMapStore((state) => state.scale);
   const prevScale = useRef(scale);
-  const stageRef = useRef<null | KonvaStage>(null);
-  const mapImgRef = useRef<null | KonvaImage>(null);
-
-  const shapeType = useCreatingStore((state) => state.shapeType);
-  const { points, stageHandlers } = useCreateShape();
-
-  const [mapPosition, setPosition] = useState(
-    getCenteredCoords({ width, height, scale }),
-  );
-
-  useEffect(() => {
-    loadMapImage();
-  }, [imgSrc]);
-
   useEffect(() => {
     setPosition((state) =>
       getScaledPosition({
         currPos: state,
         scale,
         prevScale: prevScale.current,
+        canvas: { width, height },
       }),
     );
     prevScale.current = scale;
   }, [scale]);
 
-  const loadMapImage = () => {
-    loadImage(imgSrc, setImage);
-  };
+  const [mapPosition, setPosition] = useState(
+    getCenteredCoords({ width, height, scale }),
+  );
 
-  const handleMapDragMove = (e: KonvaEventObject<DragEvent>) => {
-    const image = e.target;
+  const handleDragMove = (e: KonvaEventObject<DragEvent>) => {
+    const stage = e.target;
 
     const newPos = getMapPosition({
       canvas: {
@@ -67,40 +46,36 @@ export const Map = ({
         height,
       },
       scale,
-      currentPos: {
-        x: image.x(),
-        y: image.y(),
-      },
+      currentPos: stage.getPosition(),
       prevPos: mapPosition,
     });
 
-    image.setPosition(newPos);
+    stage.setPosition(newPos);
   };
 
   return (
-    <Stage ref={stageRef} width={width} height={height} {...stageHandlers}>
-      {image && (
-        <Layer>
-          <Image
-            ref={mapImgRef}
-            image={image}
-            scale={{ x: scale, y: scale }}
-            x={mapPosition.x}
-            y={mapPosition.y}
-            width={width}
-            height={height}
-            draggable
-            onDragMove={handleMapDragMove}
-            onDragEnd={(e) => {
-              setPosition({
-                x: e.target.x(),
-                y: e.target.y(),
-              });
-            }}
-          />
-        </Layer>
-      )}
-      {shapeType === "rect" && <Rectangle points={points} />}
+    <Stage
+      draggable
+      scaleX={scale}
+      scaleY={scale}
+      width={width}
+      height={height}
+      x={mapPosition.x}
+      y={mapPosition.y}
+      onDragMove={handleDragMove}
+      onDragEnd={(e) => {
+        setPosition({
+          x: e.target.x(),
+          y: e.target.y(),
+        });
+      }}
+    >
+      <MapImage imgSrc={imgSrc} width={width} height={height} />
+      <Layer>
+        <Group>
+          <Shapes />
+        </Group>
+      </Layer>
     </Stage>
   );
 };

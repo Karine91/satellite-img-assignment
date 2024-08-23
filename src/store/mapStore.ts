@@ -1,15 +1,19 @@
 import { create } from "zustand";
 
-import { ShapeType } from "@/types";
-
+import { ShapeData } from "@/types";
 interface MapState {
-  createMode: null | ShapeType;
-  shapes: any[];
+  shapes: ShapeData[];
+  scale: number;
+  addShape: (data: ShapeData) => void;
+  setScale: (fn: (val: number) => number) => void;
 }
 
-export const mapStore = create<MapState>()((set) => ({
-  createMode: null,
+export const useMapStore = create<MapState>()((set) => ({
   shapes: [],
-  addShape: (data: any) =>
+  scale: 1,
+  setScale: (fn) => {
+    set((state) => ({ scale: fn(state.scale) }));
+  },
+  addShape: (data: ShapeData) =>
     set((state) => ({ shapes: [...state.shapes, data] })),
 }));

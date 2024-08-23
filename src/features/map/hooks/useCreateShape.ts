@@ -2,14 +2,16 @@ import { KonvaEventObject } from "konva/lib/Node";
 import { useState, useRef } from "react";
 
 import { useCreatingStore } from "@/store/creatingStore";
+import { useMapStore } from "@/store/mapStore";
 import type { Point } from "@/types";
 
 export const useCreateShape = () => {
   const [points, setPoints] = useState<Point[]>([]);
+  const [isCreatingState, setCreatingState] = useState(false);
   const isCreating = useRef(false);
   const shapeType = useCreatingStore((state) => state.shapeType);
   const createMode = useCreatingStore((state) => state.createMode);
-  const setCreating = useCreatingStore((state) => state.setCreating);
+  const addShape = useMapStore((state) => state.addShape);
 
   function addPoint(point: Point) {
     if (shapeType === "rect" && points.length > 1) {
@@ -21,12 +23,19 @@ export const useCreateShape = () => {
 
   const startCreating = () => {
     isCreating.current = true;
-    setCreating(true);
+    setCreatingState(true);
   };
 
   const finishCreating = () => {
     isCreating.current = false;
-    setCreating(false);
+    setCreatingState(false);
+    setPoints([]);
+    // save our points to the store
+    addShape({ type: shapeType, coords: points });
+  };
+
+  const getPosition = (e: KonvaEventObject<MouseEvent>) => {
+    return e.target.getStage()?.getRelativePointerPosition();
   };
 
   const handleStageClick = (e: KonvaEventObject<MouseEvent>) => {
@@ -40,7 +49,8 @@ export const useCreateShape = () => {
 
     e.evt.preventDefault();
 
-    const position = e.target.getStage()?.getPointerPosition();
+    const position = getPosition(e);
+
     if (position) {
       startCreating();
       addPoint(position);
@@ -58,7 +68,7 @@ export const useCreateShape = () => {
 
     e.evt.preventDefault();
 
-    const position = e.target.getStage()?.getPointerPosition();
+    const position = getPosition(e);
     if (position) {
       addPoint(position);
     }
@@ -70,5 +80,6 @@ export const useCreateShape = () => {
       onClick: handleStageClick,
       onMouseMove: handleStageMouseMove,
     },
+    isCreating: isCreatingState,
   };
 };
