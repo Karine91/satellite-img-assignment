@@ -10,7 +10,7 @@ export const useCreateShape = () => {
   const [isCreatingState, setCreatingState] = useState(false);
   const isCreating = useRef(false);
   const shapeType = useCreatingStore((state) => state.shapeType);
-  const createMode = useCreatingStore((state) => state.createMode);
+  const createMode = shapeType !== null;
   const addShape = useMapStore((state) => state.addShape);
 
   function addPoint(point: Point) {
@@ -31,7 +31,9 @@ export const useCreateShape = () => {
     setCreatingState(false);
     setPoints([]);
     // save our points to the store
-    addShape({ type: shapeType, coords: points });
+    if (shapeType) {
+      addShape({ type: shapeType, coords: points });
+    }
   };
 
   const getPosition = (e: KonvaEventObject<MouseEvent>) => {
@@ -58,11 +60,7 @@ export const useCreateShape = () => {
   };
 
   const handleStageMouseMove = (e: KonvaEventObject<MouseEvent>) => {
-    if (!createMode) {
-      return;
-    }
-    // can count on this state - it's not updated in this handler
-    if (!isCreating.current) {
+    if (!createMode || !isCreating.current) {
       return;
     }
 

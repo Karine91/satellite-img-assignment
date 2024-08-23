@@ -1,18 +1,36 @@
-import Button from "@/components/Button";
+import { CreateButton } from "./CreateButton";
+
 import { useCreatingStore } from "@/store/creatingStore";
+import { ShapeType } from "@/types";
 
 export const CreatePanel = () => {
-  const setCreateMode = useCreatingStore((state) => state.setCreateMode);
   const setShapeType = useCreatingStore((state) => state.setShapeType);
+  const shapeType = useCreatingStore((state) => state.shapeType);
 
-  const createRect = () => {
-    setCreateMode(true);
-    setShapeType("rect");
+  const createShape = (type: ShapeType) => {
+    if (shapeType === type) {
+      setShapeType(null);
+    } else {
+      setShapeType(type);
+    }
   };
+
   return (
     <div className="mx-2">
       <span className="mr-2">Create Panel:</span>
-      <Button onClick={createRect}>Rectangle</Button>
+      <CreateButton
+        isActive={shapeType === "rect"}
+        className="mr-2"
+        onClick={() => createShape("rect")}
+      >
+        Rectangle
+      </CreateButton>
+      <CreateButton
+        isActive={shapeType === "polygon"}
+        onClick={() => createShape("polygon")}
+      >
+        Polygon
+      </CreateButton>
     </div>
   );
 };

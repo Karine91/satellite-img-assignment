@@ -1,4 +1,5 @@
 import { create } from "zustand";
+import { subscribeWithSelector } from "zustand/middleware";
 
 import { ShapeData } from "@/types";
 interface MapState {
@@ -8,12 +9,14 @@ interface MapState {
   setScale: (fn: (val: number) => number) => void;
 }
 
-export const useMapStore = create<MapState>()((set) => ({
-  shapes: [],
-  scale: 1,
-  setScale: (fn) => {
-    set((state) => ({ scale: fn(state.scale) }));
-  },
-  addShape: (data: ShapeData) =>
-    set((state) => ({ shapes: [...state.shapes, data] })),
-}));
+export const useMapStore = create<MapState>()(
+  subscribeWithSelector((set) => ({
+    shapes: [],
+    scale: 1,
+    setScale: (fn) => {
+      set((state) => ({ scale: fn(state.scale) }));
+    },
+    addShape: (data: ShapeData) =>
+      set((state) => ({ shapes: [...state.shapes, data] })),
+  })),
+);

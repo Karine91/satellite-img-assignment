@@ -1,22 +1,13 @@
 import { create } from "zustand";
-import { devtools } from "zustand/middleware";
 
 import { ShapeType } from "@/types";
 
 type CreateState = {
-  createMode: boolean;
-  shapeType: ShapeType;
-  setCreateMode: (val: boolean) => void;
-  setShapeType: (type: ShapeType) => void;
+  shapeType: ShapeType | null;
+  setShapeType: (type: ShapeType | null) => void;
 };
 
-export const useCreatingStore = create<CreateState>()(
-  devtools((set) => ({
-    createMode: false,
-    shapeType: "rect",
-    setCreateMode: (val) => {
-      set({ createMode: val });
-    },
-    setShapeType: (type) => set({ shapeType: type }),
-  })),
-);
+export const useCreatingStore = create<CreateState>()((set) => ({
+  shapeType: null,
+  setShapeType: (type) => set({ shapeType: type }),
+}));

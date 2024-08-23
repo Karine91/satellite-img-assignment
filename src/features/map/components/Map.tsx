@@ -1,5 +1,5 @@
 import { KonvaEventObject } from "konva/lib/Node";
-import { useState, useRef, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { Group, Stage, Layer } from "react-konva";
 
 import {
@@ -20,22 +20,30 @@ export const Map = ({
 }: Pick<IMapImageProps, "imgSrc"> &
   Partial<Pick<IMapImageProps, "height" | "width">>) => {
   const scale = useMapStore((state) => state.scale);
-  const prevScale = useRef(scale);
-  useEffect(() => {
-    setPosition((state) =>
-      getScaledPosition({
-        currPos: state,
-        scale,
-        prevScale: prevScale.current,
-        canvas: { width, height },
-      }),
-    );
-    prevScale.current = scale;
-  }, [scale]);
 
   const [mapPosition, setPosition] = useState(
     getCenteredCoords({ width, height, scale }),
   );
+
+  useEffect(() => {
+    const unsub = useMapStore.subscribe(
+      (state) => state.scale,
+      (scale, prevScale) => {
+        const newPos = getScaledPosition({
+          currPos: mapPosition,
+          scale,
+          prevScale: prevScale,
+          canvas: { width, height },
+        });
+
+        setPosition(newPos);
+      },
+    );
+
+    return () => {
+      unsub();
+    };
+  }, [mapPosition, width, height]);
 
   const handleDragMove = (e: KonvaEventObject<DragEvent>) => {
     const stage = e.target;
