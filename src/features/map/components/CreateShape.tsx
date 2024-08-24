@@ -1,13 +1,40 @@
+import { observer } from "mobx-react-lite";
+
+import { Polygon } from "./Polygon";
 import { Rectangle } from "./Rectangle";
 
-import { Point } from "@/types";
+import { ShapeType } from "@/types";
 
-export const CreateShape = ({
-  points,
-  isCreating,
-}: {
-  points: Point[];
-  isCreating: boolean;
-}) => {
-  return <Rectangle points={points} visible={isCreating} />;
-};
+export type TData<T> = T extends "rect"
+  ? React.ComponentProps<typeof Rectangle>
+  : T extends "polygon"
+    ? React.ComponentProps<typeof Polygon>
+    : never;
+
+export const CreateShape = observer(
+  <T extends ShapeType>({
+    data,
+    visible,
+    type,
+  }: {
+    data: TData<T>;
+    visible: boolean;
+    type: T;
+  }) => {
+    const commonProps = { visible };
+
+    const getShape = () => {
+      switch (type) {
+        case "rect":
+          return <Rectangle {...commonProps} {...(data as TData<"rect">)} />;
+        case "polygon":
+          return <Polygon {...commonProps} {...(data as TData<"polygon">)} />;
+        default: {
+          throw new Error("Error | Creating shape: Unknown shape type");
+        }
+      }
+    };
+
+    return getShape();
+  },
+);

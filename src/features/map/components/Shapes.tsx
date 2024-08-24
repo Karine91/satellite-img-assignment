@@ -1,9 +1,13 @@
-import { Rectangle } from "./Rectangle";
+import { observer } from "mobx-react-lite";
 
-import { useMapStore } from "@/store/mapStore";
+import { CreateShape } from "./CreateShape";
 
-export const Shapes = () => {
-  const shapes = useMapStore((state) => state.shapes);
+import { useMapStore } from "@/providers";
 
-  return shapes.map((el, ind) => <Rectangle key={ind} points={el.coords} />);
-};
+export const Shapes = observer(() => {
+  const { shapes } = useMapStore();
+
+  return shapes.map(({ type, ...data }, ind) => (
+    <CreateShape key={ind} data={data} visible={true} type={type} />
+  ));
+});

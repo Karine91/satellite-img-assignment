@@ -1,83 +1,34 @@
-import { KonvaEventObject } from "konva/lib/Node";
-import { useState, useRef } from "react";
+import { useEffect, useState } from "react";
+import { StageProps } from "react-konva";
 
-import { useCreatingStore } from "@/store/creatingStore";
-import { useMapStore } from "@/store/mapStore";
-import type { Point } from "@/types";
+import { TData } from "../components/CreateShape";
+
+import { useMapStore } from "@/providers";
+import { Rectangle } from "@/store/Rectangle";
+import { ShapeType } from "@/types";
+
+export interface ICreateShape {
+  stageProps: StageProps;
+  data: TData<ShapeType>;
+  isCreating: boolean;
+}
 
 export const useCreateShape = () => {
-  const [points, setPoints] = useState<Point[]>([]);
-  const [isCreatingState, setCreatingState] = useState(false);
-  const isCreating = useRef(false);
-  const shapeType = useCreatingStore((state) => state.shapeType);
-  const createMode = shapeType !== null;
-  const addShape = useMapStore((state) => state.addShape);
+  const store = useMapStore();
+  const [shapeStore, setShapeStore] = useState(() => createData());
 
-  function addPoint(point: Point) {
-    if (shapeType === "rect" && points.length > 1) {
-      setPoints((state) => [state[0], point]);
-    } else {
-      setPoints((state) => [...state, point]);
+  useEffect(() => {
+    setShapeStore(createData());
+  }, [store.shapeType]);
+
+  function createData() {
+    switch (store.shapeType) {
+      case "rect":
+        return new Rectangle(store);
+      default:
+        return null;
     }
   }
 
-  const startCreating = () => {
-    isCreating.current = true;
-    setCreatingState(true);
-  };
-
-  const finishCreating = () => {
-    isCreating.current = false;
-    setCreatingState(false);
-    setPoints([]);
-    // save our points to the store
-    if (shapeType) {
-      addShape({ type: shapeType, coords: points });
-    }
-  };
-
-  const getPosition = (e: KonvaEventObject<MouseEvent>) => {
-    return e.target.getStage()?.getRelativePointerPosition();
-  };
-
-  const handleStageClick = (e: KonvaEventObject<MouseEvent>) => {
-    if (!createMode) {
-      return;
-    }
-    if (isCreating.current) {
-      finishCreating();
-      return;
-    }
-
-    e.evt.preventDefault();
-
-    const position = getPosition(e);
-
-    if (position) {
-      startCreating();
-      addPoint(position);
-    }
-  };
-
-  const handleStageMouseMove = (e: KonvaEventObject<MouseEvent>) => {
-    if (!createMode || !isCreating.current) {
-      return;
-    }
-
-    e.evt.preventDefault();
-
-    const position = getPosition(e);
-    if (position) {
-      addPoint(position);
-    }
-  };
-
-  return {
-    points,
-    stageHandlers: {
-      onClick: handleStageClick,
-      onMouseMove: handleStageMouseMove,
-    },
-    isCreating: isCreatingState,
-  };
+  return shapeStore?.componentData || ({} as ICreateShape);
 };

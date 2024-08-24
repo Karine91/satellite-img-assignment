@@ -1,4 +1,5 @@
 import { Image as KonvaImage } from "konva/lib/shapes/Image";
+import { observer } from "mobx-react-lite";
 import { useState, useEffect, useRef } from "react";
 import { Image, Layer } from "react-konva";
 
@@ -6,7 +7,7 @@ import { useCreateShape } from "../hooks/useCreateShape";
 
 import { CreateShape } from "./CreateShape";
 
-import { useCreatingStore } from "@/store/creatingStore";
+import { useMapStore } from "@/providers";
 import { loadImage } from "@/utils";
 
 export interface IMapImageProps {
@@ -15,30 +16,48 @@ export interface IMapImageProps {
   imgSrc: string;
 }
 
-export const MapImage = ({ width, height, imgSrc }: IMapImageProps) => {
-  const [image, setImage] = useState<null | HTMLImageElement>(null);
+export const MapImage = observer(
+  ({
+    width,
+    height,
+    imgSrc,
+    children,
+  }: IMapImageProps & { children: React.ReactNode }) => {
+    const [image, setImage] = useState<null | HTMLImageElement>(null);
 
-  const mapImgRef = useRef<null | KonvaImage>(null);
+    const mapImgRef = useRef<null | KonvaImage>(null);
 
-  const shapeType = useCreatingStore((state) => state.shapeType);
-  const { points, stageHandlers, isCreating } = useCreateShape();
+    const { shapeType } = useMapStore();
 
-  useEffect(() => {
-    loadImage(imgSrc, setImage);
-  }, [imgSrc]);
+    const { data, stageProps, isCreating } = useCreateShape();
 
-  return image ? (
-    <Layer>
-      <Image
-        ref={mapImgRef}
-        image={image}
-        width={width}
-        height={height}
-        {...stageHandlers}
-      />
-      {shapeType === "rect" && (
-        <CreateShape points={points} isCreating={isCreating} />
-      )}
-    </Layer>
-  ) : null;
-};
+    useEffect(() => {
+      loadImage(imgSrc, setImage);
+    }, [imgSrc]);
+
+    return image ? (
+      <>
+        <Layer>
+          <Image
+            ref={mapImgRef}
+            image={image}
+            width={width}
+            height={height}
+            className={"cursor-crosshair"}
+            {...stageProps}
+          />
+        </Layer>
+        <Layer>
+          {shapeType !== null && data && (
+            <CreateShape
+              type={shapeType}
+              data={data}
+              visible={Boolean(isCreating)}
+            />
+          )}
+          {children}
+        </Layer>
+      </>
+    ) : null;
+  },
+);

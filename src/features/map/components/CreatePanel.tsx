@@ -1,11 +1,12 @@
+import { observer } from "mobx-react-lite";
+
 import { CreateButton } from "./CreateButton";
 
-import { useCreatingStore } from "@/store/creatingStore";
+import { useMapStore } from "@/providers";
 import { ShapeType } from "@/types";
 
-export const CreatePanel = () => {
-  const setShapeType = useCreatingStore((state) => state.setShapeType);
-  const shapeType = useCreatingStore((state) => state.shapeType);
+export const CreatePanel = observer(() => {
+  const { shapeType, setShapeType } = useMapStore();
 
   const createShape = (type: ShapeType) => {
     if (shapeType === type) {
@@ -33,4 +34,4 @@ export const CreatePanel = () => {
       </CreateButton>
     </div>
   );
-};
+});

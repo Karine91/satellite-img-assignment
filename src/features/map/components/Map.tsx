@@ -1,89 +1,54 @@
 import { KonvaEventObject } from "konva/lib/Node";
-import { useState, useEffect } from "react";
-import { Group, Stage, Layer } from "react-konva";
-
-import {
-  getCenteredCoords,
-  getMapPosition,
-  getScaledPosition,
-} from "../services/mapService";
+import { observer } from "mobx-react-lite";
+import { Stage } from "react-konva";
 
 import { MapImage, type IMapImageProps } from "./MapImage";
 import { Shapes } from "./Shapes";
 
-import { useMapStore } from "@/store/mapStore";
+import { useMapStore } from "@/providers";
 
-export const Map = ({
-  width = 1000,
-  height = 1000,
-  imgSrc,
-}: Pick<IMapImageProps, "imgSrc"> &
-  Partial<Pick<IMapImageProps, "height" | "width">>) => {
-  const scale = useMapStore((state) => state.scale);
+export const Map = observer(
+  ({
+    width = 1000,
+    height = 1000,
+    imgSrc,
+  }: Pick<IMapImageProps, "imgSrc"> &
+    Partial<Pick<IMapImageProps, "height" | "width">>) => {
+    const { scale, mapPosition, setPosition, getMapPositionWithinImage } =
+      useMapStore();
 
-  const [mapPosition, setPosition] = useState(
-    getCenteredCoords({ width, height, scale }),
-  );
+    const handleDragMove = (e: KonvaEventObject<DragEvent>) => {
+      const stage = e.target;
 
-  useEffect(() => {
-    const unsub = useMapStore.subscribe(
-      (state) => state.scale,
-      (scale, prevScale) => {
-        const newPos = getScaledPosition({
-          currPos: mapPosition,
-          scale,
-          prevScale: prevScale,
-          canvas: { width, height },
-        });
+      const newPos = getMapPositionWithinImage({
+        currentPos: stage.getPosition(),
+        prevPos: mapPosition,
+      });
 
-        setPosition(newPos);
-      },
-    );
-
-    return () => {
-      unsub();
+      stage.setPosition(newPos);
     };
-  }, [mapPosition, width, height]);
 
-  const handleDragMove = (e: KonvaEventObject<DragEvent>) => {
-    const stage = e.target;
-
-    const newPos = getMapPosition({
-      canvas: {
-        width,
-        height,
-      },
-      scale,
-      currentPos: stage.getPosition(),
-      prevPos: mapPosition,
-    });
-
-    stage.setPosition(newPos);
-  };
-
-  return (
-    <Stage
-      draggable
-      scaleX={scale}
-      scaleY={scale}
-      width={width}
-      height={height}
-      x={mapPosition.x}
-      y={mapPosition.y}
-      onDragMove={handleDragMove}
-      onDragEnd={(e) => {
-        setPosition({
-          x: e.target.x(),
-          y: e.target.y(),
-        });
-      }}
-    >
-      <MapImage imgSrc={imgSrc} width={width} height={height} />
-      <Layer>
-        <Group>
+    return (
+      <Stage
+        draggable
+        scaleX={scale}
+        scaleY={scale}
+        width={width}
+        height={height}
+        x={mapPosition.x}
+        y={mapPosition.y}
+        onDragMove={handleDragMove}
+        onDragEnd={(e) => {
+          setPosition({
+            x: e.target.x(),
+            y: e.target.y(),
+          });
+        }}
+      >
+        <MapImage imgSrc={imgSrc} width={width} height={height}>
           <Shapes />
-        </Group>
-      </Layer>
-    </Stage>
-  );
-};
+        </MapImage>
+      </Stage>
+    );
+  },
+);

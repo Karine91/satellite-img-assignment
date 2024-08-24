@@ -1,25 +1,22 @@
+import { observer } from "mobx-react-lite";
+
 import Button from "@/components/Button";
-import { useMapStore } from "@/store/mapStore";
+import { useMapStore } from "@/providers";
 
 interface IZoomPanel {
   min: number;
   max: number;
 }
 
-export const ZoomPanel = ({ min, max }: IZoomPanel) => {
-  const scale = useMapStore((state) => state.scale);
-  const setScale = useMapStore((state) => state.setScale);
+export const ZoomPanel = observer(({ min, max }: IZoomPanel) => {
+  const { scale, setScale } = useMapStore();
 
   const zoomIn = () => {
-    setScale((s) => {
-      return Math.min(Math.floor(s + 1), max);
-    });
+    setScale(Math.min(Math.floor(scale + 1), max));
   };
 
   const zoomOut = () => {
-    setScale((s) => {
-      return Math.max(s - 1, min);
-    });
+    setScale(Math.max(scale - 1, min));
   };
 
   return (
@@ -33,4 +30,4 @@ export const ZoomPanel = ({ min, max }: IZoomPanel) => {
       </Button>
     </div>
   );
-};
+});
