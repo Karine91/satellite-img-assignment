@@ -25,7 +25,6 @@ export abstract class ShapeBase {
   @action
   startCreating() {
     this.isCreating = true;
-    this.resetState();
   }
 
   @action

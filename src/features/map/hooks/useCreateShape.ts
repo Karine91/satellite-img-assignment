@@ -4,6 +4,7 @@ import { StageProps } from "react-konva";
 import { TData } from "../components/CreateShape";
 
 import { useMapStore } from "@/providers";
+import { Polygon } from "@/store/Polygon";
 import { Rectangle } from "@/store/Rectangle";
 import { ShapeType } from "@/types";
 
@@ -25,6 +26,8 @@ export const useCreateShape = () => {
     switch (store.shapeType) {
       case "rect":
         return new Rectangle(store);
+      case "polygon":
+        return new Polygon(store);
       default:
         return null;
     }

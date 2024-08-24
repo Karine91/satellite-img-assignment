@@ -1,18 +1,18 @@
-import { KonvaEventObject } from "konva/lib/Node";
-import { observable, action, computed } from "mobx";
+import { observable, computed, action } from "mobx";
 
 import { MapStoreState } from "./MapStoreState";
-import { ShapeBase } from "./ShapeBase";
+import { MixinPolygon } from "./PolygonMixin";
 
 import { Point } from "@/types";
 
-export class Rectangle extends ShapeBase {
+export class Rectangle extends MixinPolygon {
   @observable accessor points: Point[];
   constructor(store: MapStoreState) {
     super("rect", store);
     this.points = [];
   }
 
+  @action.bound
   addPoint(point: Point) {
     if (this.points.length > 1) {
       this.points[1] = point;
@@ -32,48 +32,18 @@ export class Rectangle extends ShapeBase {
     };
   }
 
-  addShape(): void {
+  @action.bound
+  saveShape(): void {
     super.addShape({ ...this.rectData, type: "rect" });
-  }
-
-  @action.bound
-  handleStageClick(e: KonvaEventObject<MouseEvent>) {
-    if (!this.createMode) {
-      return;
-    }
-    if (this.isCreating) {
-      this.addShape();
-      this.finishCreating();
-      return;
-    }
-
-    e.evt.preventDefault();
-
-    const position = this.getPosition(e);
-
-    if (position) {
-      this.startCreating();
-      this.addPoint(position);
-    }
-  }
-
-  @action.bound
-  handleStageMouseMove(e: KonvaEventObject<MouseEvent>) {
-    if (!this.createMode || !this.isCreating) {
-      return;
-    }
-
-    e.evt.preventDefault();
-
-    const position = this.getPosition(e);
-    if (position) {
-      this.addPoint(position);
-    }
   }
 
   @action
   resetState(): void {
     this.points = [];
+  }
+
+  isCreatingContinue(): boolean {
+    return this.points.length === 2;
   }
 
   @computed
