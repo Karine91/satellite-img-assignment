@@ -15,13 +15,15 @@ export const CreateShape = observer(
   <T extends ShapeType>({
     data,
     visible,
+    listening = false,
     type,
   }: {
     data: TData<T>;
     visible: boolean;
+    listening?: boolean;
     type: T;
   }) => {
-    const commonProps = { visible };
+    const commonProps = { visible, listening };
 
     const getShape = () => {
       switch (type) {

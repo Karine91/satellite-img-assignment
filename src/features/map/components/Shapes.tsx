@@ -8,6 +8,6 @@ export const Shapes = observer(() => {
   const { shapes } = useMapStore();
 
   return shapes.map(({ type, ...data }, ind) => (
-    <CreateShape key={ind} data={data} visible={true} type={type} />
+    <CreateShape key={ind} data={data} visible listening type={type} />
   ));
 });

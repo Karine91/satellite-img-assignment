@@ -5,16 +5,19 @@ import { ShapeBase } from "./ShapeBase";
 
 export abstract class MixinPolygon extends ShapeBase {
   abstract saveShape(): void;
-  abstract addPoint(pos: ReturnType<typeof this.getPosition>): void;
+  abstract addPoint(
+    pos: ReturnType<typeof this.getPosition>,
+    moving?: boolean,
+  ): void;
 
-  abstract isCreatingContinue(): boolean;
+  abstract get isCreatingContinue(): boolean;
 
   @action.bound
   handleStageClick(e: KonvaEventObject<MouseEvent>) {
     if (!this.createMode) {
       return;
     }
-    if (this.isCreatingContinue()) {
+    if (!this.isCreatingContinue) {
       this.saveShape();
       this.finishCreating();
       return;
@@ -25,7 +28,10 @@ export abstract class MixinPolygon extends ShapeBase {
     const position = this.getPosition(e);
 
     if (position) {
-      this.startCreating();
+      if (!this.isCreating) {
+        this.startCreating();
+      }
+
       this.addPoint(position);
     }
   }
@@ -40,7 +46,7 @@ export abstract class MixinPolygon extends ShapeBase {
 
     const position = this.getPosition(e);
     if (position) {
-      this.addPoint(position);
+      this.addPoint(position, true);
     }
   }
 }

@@ -22,23 +22,30 @@ export class Polygon extends MixinPolygon {
     };
   }
 
-  addPoint(point: Point) {
-    this.points.push(point.x, point.y);
+  @action.bound
+  addPoint(point: Point, moving: boolean) {
+    if (moving && this.points.length > 2) {
+      this.points = [...this.points.slice(0, -2), point.x, point.y];
+    } else {
+      this.points.push(point.x, point.y);
+    }
   }
 
+  @action.bound
   saveShape(): void {
     super.addShape({ type: "polygon", ...this.polygonData });
   }
 
-  isCreatingContinue(): boolean {
-    return this.points.length === MAX_POINTS * 2;
+  @computed
+  get isCreatingContinue(): boolean {
+    return this.points.length < MAX_POINTS * 2;
   }
 
   @computed
   get componentData() {
     return {
       stageProps: {
-        onClick: this.handleStageClick,
+        onMouseDown: this.handleStageClick,
         onMouseMove: this.handleStageMouseMove,
       },
       data: this.polygonData,

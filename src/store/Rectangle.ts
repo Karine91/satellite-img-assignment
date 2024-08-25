@@ -13,9 +13,9 @@ export class Rectangle extends MixinPolygon {
   }
 
   @action.bound
-  addPoint(point: Point) {
-    if (this.points.length > 1) {
-      this.points[1] = point;
+  addPoint(point: Point, moving: boolean = false) {
+    if (moving && this.points.length > 1) {
+      this.points[this.points.length - 1] = point;
     } else {
       this.points.push(point);
     }
@@ -42,8 +42,9 @@ export class Rectangle extends MixinPolygon {
     this.points = [];
   }
 
-  isCreatingContinue(): boolean {
-    return this.points.length === 2;
+  @computed
+  get isCreatingContinue(): boolean {
+    return this.points.length < 2;
   }
 
   @computed

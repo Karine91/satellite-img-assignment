@@ -6,14 +6,15 @@ import type { RectangleShape } from "@/types";
 export const Rectangle = observer(
   ({
     visible = true,
+    listening,
     ...shapeData
-  }: { visible?: boolean } & RectangleShape) => {
+  }: { visible?: boolean; listening?: boolean } & RectangleShape) => {
     return (
       <Rect
         {...shapeData}
         fill="rgba(0,0,255,0.5)"
         visible={visible}
-        listening={false}
+        listening={listening}
       />
     );
   },
