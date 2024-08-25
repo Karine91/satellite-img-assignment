@@ -17,3 +17,10 @@ export const loadImage = (
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
+
+export const uid = () => {
+  return (performance.now().toString(36) + Math.random().toString(36)).replace(
+    /\./g,
+    "",
+  );
+};

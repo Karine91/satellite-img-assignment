@@ -15,25 +15,15 @@ export class Polygon extends MixinPolygon {
     this.points = [];
   }
 
-  @computed
-  get polygonData() {
-    return {
-      points: this.points,
-    };
-  }
-
   @action.bound
   addPoint(point: Point, moving: boolean) {
-    if (moving && this.points.length > 2) {
-      this.points = [...this.points.slice(0, -2), point.x, point.y];
-    } else {
-      this.points.push(point.x, point.y);
-    }
+    const newPoints = MixinPolygon.addPointHelper(point, moving, this.points);
+    this.points = newPoints;
   }
 
-  @action.bound
-  saveShape(): void {
-    super.addShape({ type: "polygon", ...this.polygonData });
+  @computed
+  get data() {
+    return { points: this.points };
   }
 
   @computed
@@ -45,10 +35,10 @@ export class Polygon extends MixinPolygon {
   get componentData() {
     return {
       stageProps: {
-        onMouseDown: this.handleStageClick,
+        onClick: this.handleStageClick,
         onMouseMove: this.handleStageMouseMove,
       },
-      data: this.polygonData,
+      data: this.data,
       isCreating: this.isCreating,
     };
   }

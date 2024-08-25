@@ -1,25 +1,25 @@
-import { action, computed, observable, reaction } from "mobx";
+import { AxiosResponse } from "axios";
+import { action, computed, observable, reaction, flow } from "mobx";
 
-import { ShapeData, ShapeType } from "@/types";
-
-type Position = {
-  x: number;
-  y: number;
-};
+import type { ApiService } from "@/services/api-service";
+import { ShapeData, ShapeType, Point } from "@/types";
 
 export class MapStoreState {
   @observable public accessor shapes: ShapeData[] = [];
   @observable public accessor scale: number = 1;
 
-  @observable public accessor mapPosition: Position;
+  @observable public accessor mapPosition: Point;
 
   @observable public accessor shapeType: ShapeType | null = null;
 
   constructor(
     public readonly width: number,
     public readonly height: number,
+    private apiService: ApiService,
   ) {
     this.mapPosition = this.getCenteredCoords();
+
+    this.init();
 
     reaction(
       () => this.scale,
@@ -29,6 +29,15 @@ export class MapStoreState {
       },
     );
   }
+
+  init = flow(function* (this: MapStoreState) {
+    try {
+      const { data } = yield this.getShapes();
+      this.shapes = data;
+    } catch (error) {
+      console.log(error);
+    }
+  });
 
   @action.bound
   setScale(val: number) {
@@ -45,8 +54,16 @@ export class MapStoreState {
     this.shapes.push(shape);
   }
 
+  createShape(data: Omit<ShapeData, "id">): Promise<AxiosResponse<ShapeData>> {
+    return this.apiService.post("/shape", data);
+  }
+
+  getShapes() {
+    return this.apiService.get("/shape");
+  }
+
   @action.bound
-  setPosition(newPos: Position) {
+  setPosition(newPos: Point) {
     this.mapPosition = newPos;
   }
 
@@ -70,8 +87,8 @@ export class MapStoreState {
     currentPos,
     prevPos,
   }: {
-    currentPos: Position;
-    prevPos: Position;
+    currentPos: Point;
+    prevPos: Point;
   }) {
     const newPos = { ...currentPos };
     const map = this.scaledWidth;

@@ -3,8 +3,8 @@ import { observer } from "mobx-react-lite";
 import { Stage } from "react-konva";
 
 import { MapImage, type IMapImageProps } from "./MapImage";
-import { Shapes } from "./Shapes";
 
+import { Shapes } from "@/features/shape";
 import { useMapStore } from "@/providers";
 
 export const Map = observer(

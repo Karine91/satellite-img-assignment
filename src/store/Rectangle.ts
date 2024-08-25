@@ -6,35 +6,21 @@ import { MixinPolygon } from "./PolygonMixin";
 import { Point } from "@/types";
 
 export class Rectangle extends MixinPolygon {
-  @observable accessor points: Point[];
+  @observable accessor points: number[];
   constructor(store: MapStoreState) {
     super("rect", store);
     this.points = [];
   }
 
   @action.bound
-  addPoint(point: Point, moving: boolean = false) {
-    if (moving && this.points.length > 1) {
-      this.points[this.points.length - 1] = point;
-    } else {
-      this.points.push(point);
-    }
+  addPoint(point: Point, moving: boolean) {
+    const newPoints = MixinPolygon.addPointHelper(point, moving, this.points);
+    this.points = newPoints;
   }
 
   @computed
-  get rectData() {
-    const [p1 = { x: 0, y: 0 }, p2 = p1] = this.points;
-    return {
-      x: Math.min(p1.x, p2.x),
-      y: Math.min(p1.y, p2.y),
-      width: Math.abs(p2.x - p1.x),
-      height: Math.abs(p2.y - p1.y),
-    };
-  }
-
-  @action.bound
-  saveShape(): void {
-    super.addShape({ ...this.rectData, type: "rect" });
+  get data() {
+    return { points: this.points };
   }
 
   @action
@@ -54,7 +40,7 @@ export class Rectangle extends MixinPolygon {
         onClick: this.handleStageClick,
         onMouseMove: this.handleStageMouseMove,
       },
-      data: this.rectData,
+      data: this.data,
       isCreating: this.isCreating,
     };
   }

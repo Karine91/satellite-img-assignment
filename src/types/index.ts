@@ -7,15 +7,9 @@ export type ShapeType = "polygon" | "rect";
 
 export type ShapeData = {
   type: ShapeType;
-} & (RectangleShape | PolygonShape);
+  id: string;
+} & ShapeDataBase;
 
-export type RectangleShape = {
-  x: number;
-  y: number;
-  width: number;
-  height: number;
-};
-
-export type PolygonShape = {
+export interface ShapeDataBase {
   points: number[];
-};
+}

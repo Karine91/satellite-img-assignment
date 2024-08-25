@@ -1,16 +1,14 @@
 import { useEffect, useState } from "react";
 import { StageProps } from "react-konva";
 
-import { TData } from "../components/CreateShape";
-
 import { useMapStore } from "@/providers";
 import { Polygon } from "@/store/Polygon";
 import { Rectangle } from "@/store/Rectangle";
-import { ShapeType } from "@/types";
+import { ShapeDataBase } from "@/types";
 
 export interface ICreateShape {
   stageProps: StageProps;
-  data: TData<ShapeType>;
+  data: ShapeDataBase;
   isCreating: boolean;
 }
 

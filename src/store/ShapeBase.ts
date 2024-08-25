@@ -1,11 +1,12 @@
+import { AxiosResponse } from "axios";
 import { KonvaEventObject } from "konva/lib/Node";
-import { action, observable, computed } from "mobx";
+import { action, observable, computed, flow } from "mobx";
 
-import { ICreateShape } from "../features/map/hooks/useCreateShape";
+import { ICreateShape } from "../features/shape/hooks/useCreateShape";
 
 import { MapStoreState } from "./MapStoreState";
 
-import { ShapeData, ShapeType } from "@/types";
+import { ShapeType, ShapeData } from "@/types";
 
 export abstract class ShapeBase {
   @observable accessor isCreating: boolean;
@@ -33,9 +34,11 @@ export abstract class ShapeBase {
     this.resetState();
   }
 
-  @action.bound
-  addShape(data: ShapeData) {
-    this.mapStore.addShape(data);
+  @flow.bound
+  *addShape(data: Omit<ShapeData, "id">) {
+    const { data: newShape }: AxiosResponse<ShapeData> =
+      yield this.mapStore.createShape(data);
+    this.mapStore.addShape(newShape);
   }
 
   getPosition = (e: KonvaEventObject<MouseEvent>) => {

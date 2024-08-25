@@ -1,16 +1,42 @@
 import { KonvaEventObject } from "konva/lib/Node";
-import { action } from "mobx";
+import { action, flow } from "mobx";
 
 import { ShapeBase } from "./ShapeBase";
 
+import { Point, ShapeDataBase } from "@/types";
+
 export abstract class MixinPolygon extends ShapeBase {
-  abstract saveShape(): void;
+  abstract get data(): ShapeDataBase;
   abstract addPoint(
     pos: ReturnType<typeof this.getPosition>,
     moving?: boolean,
   ): void;
 
   abstract get isCreatingContinue(): boolean;
+
+  @flow.bound
+  *saveShape() {
+    try {
+      yield super.addShape({ type: this.type, ...this.data });
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
+  static addPointHelper(
+    point: Point,
+    moving: boolean = false,
+    points: number[],
+  ) {
+    let newPoints = [...points];
+    if (moving && points.length > 2) {
+      newPoints = [...newPoints.slice(0, -2), point.x, point.y];
+    } else {
+      newPoints.push(point.x, point.y);
+    }
+
+    return newPoints;
+  }
 
   @action.bound
   handleStageClick(e: KonvaEventObject<MouseEvent>) {

@@ -3,10 +3,8 @@ import { observer } from "mobx-react-lite";
 import { useState, useEffect, useRef } from "react";
 import { Image, Layer } from "react-konva";
 
-import { useCreateShape } from "../hooks/useCreateShape";
-
-import { CreateShape } from "./CreateShape";
-
+import { CreateShape } from "@/features/shape";
+import { useCreateShape } from "@/features/shape";
 import { useMapStore } from "@/providers";
 import { loadImage } from "@/utils";
 
