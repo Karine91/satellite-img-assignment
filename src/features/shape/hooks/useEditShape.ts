@@ -1,18 +1,35 @@
 import { KonvaEventObject } from "konva/lib/Node";
 import { Shape as KonvaShape } from "konva/lib/Shape";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
-export type EditProps = ReturnType<typeof useEditShape>["editData"];
+import { useMapStore } from "@/providers";
+
+export type EditProps = {
+  onClick: (e: KonvaEventObject<MouseEvent>) => void;
+  listening: boolean;
+};
 
 export const useEditShape = () => {
-  const [editMode, setMode] = useState(false);
+  const { editMode, setEditShapeId } = useMapStore();
   const [nodes, setNodes] = useState<KonvaShape[] | null>(null);
-  const handleShapeClick = (e: KonvaEventObject<MouseEvent>) => {
-    console.log("click on shape");
 
-    setMode(true);
-    console.log(e.target);
-    setNodes([e.target as KonvaShape]);
+  useEffect(() => {
+    if (!editMode) {
+      setNodes(null);
+    }
+  }, [editMode]);
+
+  const handleShapeClick =
+    (id: string) => (e: KonvaEventObject<MouseEvent>) => {
+      e.evt.preventDefault();
+
+      setEditShapeId(id);
+      setNodes([e.target as KonvaShape]);
+    };
+
+  const closeEditMode = () => {
+    setNodes(null);
+    setEditShapeId(null);
   };
 
   return {
@@ -22,5 +39,6 @@ export const useEditShape = () => {
     },
     nodes,
     editMode,
+    closeEditMode,
   };
 };

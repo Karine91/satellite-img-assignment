@@ -2,6 +2,7 @@ import { observer } from "mobx-react-lite";
 import { createContext, FunctionComponent, useContext } from "react";
 import { useState } from "react";
 
+import { ShapeApiService } from "@/features/shape";
 import { ApiService } from "@/services/api-service";
 import { MapStoreState } from "@/store/MapStoreState";
 
@@ -11,7 +12,10 @@ export const MapStoreProvider: FunctionComponent<{
   children: React.ReactNode;
 }> = observer(({ children }) => {
   const apiService = new ApiService();
-  const [mapStore] = useState(() => new MapStoreState(1000, 1000, apiService));
+  const shapeApiService = new ShapeApiService(apiService);
+  const [mapStore] = useState(
+    () => new MapStoreState(1000, 1000, shapeApiService),
+  );
   return (
     <MapStoreContext.Provider value={mapStore}>
       {children}

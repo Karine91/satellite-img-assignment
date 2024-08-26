@@ -27,4 +27,20 @@ const getShapesHandler = http.get(`${API_URL}/shape`, async () => {
   return HttpResponse.json(shapes, { status: 200 });
 });
 
-export const handlers = [createShapeHandler, getShapesHandler];
+const deleteShapeHandler = http.delete(
+  `${API_URL}/shape/:id`,
+  async ({ params }) => {
+    const { id } = params;
+
+    db.shape.delete({ where: { id: { equals: id as string } } });
+
+    await delay(300);
+    return HttpResponse.json({ status: 200 });
+  },
+);
+
+export const handlers = [
+  createShapeHandler,
+  getShapesHandler,
+  deleteShapeHandler,
+];

@@ -1,7 +1,7 @@
 import { AxiosResponse } from "axios";
 import { action, computed, observable, reaction, flow } from "mobx";
 
-import type { ApiService } from "@/services/api-service";
+import { ShapeApiService } from "@/features/shape";
 import { ShapeData, ShapeType, Point } from "@/types";
 
 export class MapStoreState {
@@ -12,10 +12,12 @@ export class MapStoreState {
 
   @observable public accessor shapeType: ShapeType | null = null;
 
+  @observable public accessor editShapeId: string | null = null;
+
   constructor(
     public readonly width: number,
     public readonly height: number,
-    private apiService: ApiService,
+    public shapeApi: ShapeApiService,
   ) {
     this.mapPosition = this.getCenteredCoords();
 
@@ -32,12 +34,22 @@ export class MapStoreState {
 
   init = flow(function* (this: MapStoreState) {
     try {
-      const { data } = yield this.getShapes();
+      const { data } = yield this.shapeApi.getShapes();
       this.shapes = data;
     } catch (error) {
       console.log(error);
     }
   });
+
+  @computed
+  get editMode() {
+    return this.editShapeId !== null;
+  }
+
+  @action.bound
+  setEditShapeId(id: string | null) {
+    this.editShapeId = id;
+  }
 
   @action.bound
   setScale(val: number) {
@@ -50,16 +62,27 @@ export class MapStoreState {
   }
 
   @action.bound
-  addShape(shape: ShapeData) {
-    this.shapes.push(shape);
+  addShapeToStore(data: ShapeData) {
+    this.shapes.push(data);
   }
 
-  createShape(data: Omit<ShapeData, "id">): Promise<AxiosResponse<ShapeData>> {
-    return this.apiService.post("/shape", data);
+  @flow.bound
+  *addShape(data: Omit<ShapeData, "id">) {
+    const { data: newShape }: AxiosResponse<ShapeData> =
+      yield this.shapeApi.createShape(data);
+    this.addShapeToStore(newShape);
   }
 
-  getShapes() {
-    return this.apiService.get("/shape");
+  @flow.bound
+  *deleteShape() {
+    if (!this.editShapeId) return;
+    yield this.shapeApi.deleteShape(this.editShapeId);
+    this.deleteShapeFromStore(this.editShapeId);
+  }
+
+  @action.bound
+  deleteShapeFromStore(id: string) {
+    this.shapes = this.shapes.filter((item) => item.id !== id);
   }
 
   @action.bound

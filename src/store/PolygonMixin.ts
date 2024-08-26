@@ -17,7 +17,7 @@ export abstract class MixinPolygon extends ShapeBase {
   @flow.bound
   *saveShape() {
     try {
-      yield super.addShape({ type: this.type, ...this.data });
+      yield this.mapStore.addShape({ type: this.type, ...this.data });
     } catch (error) {
       console.error(error);
     }

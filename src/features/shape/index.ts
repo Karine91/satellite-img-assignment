@@ -6,3 +6,5 @@ export * from "./hooks/useCreateShape";
 export * from "./hooks/useEditShape";
 
 export * from "./types";
+
+export * from "./api/ShapeApiService";

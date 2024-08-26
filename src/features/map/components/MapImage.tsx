@@ -8,7 +8,7 @@ import { useCreateShape } from "@/features/shape";
 import { useMapStore } from "@/providers";
 import { loadImage } from "@/utils";
 
-export interface IMapImageProps {
+interface IMapImageProps {
   width: number;
   height: number;
   imgSrc: string;
