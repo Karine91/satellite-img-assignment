@@ -1,6 +1,6 @@
 # Map with ability to draw rectangles and polygons
 
-Notes:
+## Notes
 
 - creating rectangles and polygons - Polygons currently limited for 4 points to simplify implementation. The better implementation would be to allow as many points user clicked and finish creating object when last point close enough to begin point - make it bind to it (close polygon).
 - implemented zoom for map - controlled by buttons. Better implementation would be zoom on scroll event. Added restriction for dragging map image - viewport bound to image.
@@ -11,3 +11,12 @@ Notes:
 - Delete shape - active in editMode.
 - Mobx subclassing - subclassing is supported with limitations - can't override field declarations.
 - map image link currently hardcoded
+
+## Technologies
+
+- Mobx
+- React
+- msw
+- konva
+- ts
+- tailwindcss
