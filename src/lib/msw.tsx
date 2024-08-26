@@ -11,7 +11,7 @@ export async function enableMocking() {
 
   const { worker } = await import("@/testing/mocks/browser");
 
-  await worker.start();
+  await worker.start({ onUnhandledRequest: "bypass" });
   seedDb();
 }
 
